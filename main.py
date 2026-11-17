@@ -26,6 +26,18 @@ TEXT = (
     "It will still be there when the boat comes in."
 )
 
+# Gate check before writing: the file must be UTF-8, 1 to 1,000 characters
+# (counted as Unicode code points), and not only white space. Fail loudly
+# here rather than letting the gate refuse the entry after grading. The text
+# is also one paragraph by design, so a line end is refused too.
+if not 1 <= len(TEXT) <= 1000:
+    raise SystemExit(f"gate: text is {len(TEXT)} characters, must be 1-1000")
+if not TEXT.strip():
+    raise SystemExit("gate: text is only white space")
+if "\n" in TEXT or "\r" in TEXT:
+    raise SystemExit("gate: text must be a single paragraph (no line end)")
+TEXT.encode("utf-8")  # raises UnicodeEncodeError if not UTF-8
+
 # Bytes, not text mode: text mode would write the platform's line ends and
 # its default encoding. The judge reads exactly the bytes in the file.
 with open(os.path.join(OUTPUT_DIR, "entry.txt"), "wb") as f:
